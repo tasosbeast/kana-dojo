@@ -301,11 +301,11 @@ function QuestionDisplay<T>({
             {lastAnswerCorrect
               ? '✓ Correct!'
               : gameMode === 'Pick'
-              ? '✗ Try again!'
-              : `✗ Incorrect! It was "${getCorrectAnswer(
-                  currentQuestion,
-                  isReverseActive
-                )}"`}
+                ? '✗ Try again!'
+                : `✗ Incorrect! It was "${getCorrectAnswer(
+                    currentQuestion,
+                    isReverseActive
+                  )}"`}
           </div>
         )}
       </div>
@@ -485,7 +485,7 @@ function GoalTimersSidebar({
       {goalTimers.nextGoal && (
         <div
           className={clsx(
-            'p-4 border-2 rounded-xl',
+            ' border-2 rounded-xl p-4',
             'border-[var(--main-color)] bg-[var(--main-color)]/5'
           )}
         >
@@ -498,7 +498,7 @@ function GoalTimersSidebar({
           <p className='font-bold text-[var(--main-color)] mb-2'>
             {goalTimers.nextGoal.label}
           </p>
-          <div className='w-full bg-[var(--border-color)] rounded-full h-2'>
+          <div className='w-full bg-[var(--border-color)] rounded-full h-2 '>
             <div
               className='bg-[var(--main-color)] h-2 rounded-full transition-all'
               style={{ width: `${goalTimers.progressToNextGoal}%` }}

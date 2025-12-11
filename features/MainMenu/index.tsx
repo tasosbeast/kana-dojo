@@ -19,6 +19,7 @@ import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import clsx from 'clsx';
 import { useClick } from '@/shared/hooks/useAudio';
 import usePreferencesStore from '@/features/Preferences/store/usePreferencesStore';
+import useDecorationsStore from '@/shared/store/useDecorationsStore';
 import { useMediaQuery } from 'react-responsive';
 import { buttonBorderStyles } from '@/shared/lib/styles';
 import { Button } from '@/shared/components/ui/button';
@@ -34,7 +35,12 @@ const MainMenu = () => {
 
   const { playClick } = useClick();
 
-  const [expandDecorations, setExpandDecorations] = useState(false);
+  const expandDecorations = useDecorationsStore(
+    state => state.expandDecorations
+  );
+  const toggleExpandDecorations = useDecorationsStore(
+    state => state.toggleExpandDecorations
+  );
 
   const [showBanner, setShowBanner] = useState(false);
 
@@ -112,7 +118,7 @@ const MainMenu = () => {
             )}
             onClick={() => {
               playClick();
-              setExpandDecorations(expandDecorations => !expandDecorations);
+              toggleExpandDecorations();
             }}
           >
             <Sparkle />

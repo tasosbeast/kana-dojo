@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { useClick } from '@/shared/hooks/useAudio';
 import usePreferencesStore from '@/features/Preferences/store/usePreferencesStore';
 import useCrazyModeStore from '@/features/CrazyMode/store/useCrazyModeStore';
+import useDecorationsStore from '@/shared/store/useDecorationsStore';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 const APP_VERSION = '0.1.9 (alpha)';
@@ -54,6 +55,9 @@ const MobileBottomBar = () => {
   const font = usePreferencesStore(state => state.font);
   const isCrazyMode = useCrazyModeStore(state => state.isCrazyMode);
   const activeThemeId = useCrazyModeStore(state => state.activeThemeId);
+  const expandDecorations = useDecorationsStore(
+    state => state.expandDecorations
+  );
   const effectiveTheme = isCrazyMode && activeThemeId ? activeThemeId : theme;
 
   const handleClick = (url: string) => {
@@ -79,7 +83,8 @@ const MobileBottomBar = () => {
       className={clsx(
         'fixed bottom-0 left-0 right-0 z-50 max-md:hidden',
         'bg-[var(--background-color)] border-t-1 border-[var(--border-color)]',
-        'px-4 py-1 flex items-center justify-between'
+        'px-4 py-1 flex items-center justify-between',
+        expandDecorations && 'hidden'
       )}
     >
       <div className='flex items-center gap-3'>
