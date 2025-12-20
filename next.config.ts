@@ -12,7 +12,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 const nextConfig: NextConfig = {
   // Performance optimizations
   reactStrictMode: false, // Disable in dev for faster startup (enable in production)
-  swcMinify: true, // Explicit SWC minification (default in Next.js 13+, but explicit is better)
+  // swcMinify removed - enabled by default in Next.js 13+
   compress: true, // Enable gzip/brotli compression
   poweredByHeader: false, // Remove X-Powered-By header for security
   generateEtags: true, // Generate ETags for better caching
@@ -42,15 +42,16 @@ const nextConfig: NextConfig = {
       'wanakana'
     ],
     // Faster builds
-    webpackBuildWorker: true,
-    // Turbo-specific optimizations
-    turbo: {
-      // Resolve aliases for faster module resolution
-      resolveAlias: {
-        '@/features': './features',
-        '@/shared': './shared',
-        '@/core': './core'
-      }
+    webpackBuildWorker: true
+  },
+
+  // Turbopack configuration (moved from experimental.turbo in Next.js 15)
+  turbopack: {
+    // Resolve aliases for faster module resolution
+    resolveAlias: {
+      '@/features': './features',
+      '@/shared': './shared',
+      '@/core': './core'
     }
   },
 
