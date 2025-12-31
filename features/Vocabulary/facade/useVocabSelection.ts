@@ -1,5 +1,6 @@
 'use client';
 
+import { useShallow } from 'zustand/react/shallow';
 import useVocabStore from '../store/useVocabStore';
 import type { IVocabObj } from '../store/useVocabStore';
 
@@ -29,24 +30,24 @@ export interface VocabSelectionActions {
 }
 
 export function useVocabSelection(): VocabSelection & VocabSelectionActions {
-  const store = useVocabStore();
+  return useVocabStore(
+    useShallow(state => ({
+      // State
+      selectedVocab: state.selectedVocabObjs,
+      selectedSets: state.selectedVocabSets,
+      selectedCollection: state.selectedVocabCollection,
+      totalSelected: state.selectedVocabObjs.length,
+      isEmpty: state.selectedVocabObjs.length === 0,
+      gameMode: state.selectedGameModeVocab,
 
-  return {
-    // State
-    selectedVocab: store.selectedVocabObjs,
-    selectedSets: store.selectedVocabSets,
-    selectedCollection: store.selectedVocabCollection,
-    totalSelected: store.selectedVocabObjs.length,
-    isEmpty: store.selectedVocabObjs.length === 0,
-    gameMode: store.selectedGameModeVocab,
-
-    // Actions
-    addVocab: store.addVocabObj,
-    addVocabList: store.addVocabObjs,
-    clearVocab: store.clearVocabObjs,
-    setCollection: store.setSelectedVocabCollection,
-    setSets: store.setSelectedVocabSets,
-    clearSets: store.clearVocabSets,
-    setGameMode: store.setSelectedGameModeVocab
-  };
+      // Actions
+      addVocab: state.addVocabObj,
+      addVocabList: state.addVocabObjs,
+      clearVocab: state.clearVocabObjs,
+      setCollection: state.setSelectedVocabCollection,
+      setSets: state.setSelectedVocabSets,
+      clearSets: state.clearVocabSets,
+      setGameMode: state.setSelectedGameModeVocab
+    }))
+  );
 }

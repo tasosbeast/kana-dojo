@@ -8,6 +8,10 @@ export {
   useThemePreferences,
   useInputPreferences
 } from './facade';
+export type {
+  AudioPreferences,
+  InputPreferences
+} from './facade';
 
 // Components (page-level)
 export { default as ThemesModal } from './components/ThemesModal';

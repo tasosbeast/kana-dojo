@@ -9,7 +9,13 @@ export {
   useSessionStats,
   useTimedStats
 } from './facade';
-export type { GameStats, GameStatsActions } from './facade';
+export type {
+  GameStats,
+  GameStatsActions,
+  StatsDisplay,
+  SessionStats,
+  TimedStats
+} from './facade';
 
 // Components (page-level)
 export { default as ProgressWithSidebar } from './components/ProgressWithSidebar';

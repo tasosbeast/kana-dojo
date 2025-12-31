@@ -6,3 +6,8 @@ export {
   useSessionStats,
   useTimedStats
 } from './useStatsDisplay';
+export type {
+  StatsDisplay,
+  SessionStats,
+  TimedStats
+} from './useStatsDisplay';

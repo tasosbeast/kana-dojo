@@ -1,5 +1,6 @@
 'use client';
 
+import { useShallow } from 'zustand/react/shallow';
 import useKanaStore from '../store/useKanaStore';
 
 /**
@@ -25,28 +26,28 @@ export interface KanaSelectionActions {
 }
 
 export function useKanaSelection(): KanaSelection & KanaSelectionActions {
-  const store = useKanaStore();
+  return useKanaStore(
+    useShallow(state => ({
+      // State
+      selectedGroupIndices: state.kanaGroupIndices,
+      totalSelected: state.kanaGroupIndices.length,
+      isEmpty: state.kanaGroupIndices.length === 0,
+      gameMode: state.selectedGameModeKana,
 
-  return {
-    // State
-    selectedGroupIndices: store.kanaGroupIndices,
-    totalSelected: store.kanaGroupIndices.length,
-    isEmpty: store.kanaGroupIndices.length === 0,
-    gameMode: store.selectedGameModeKana,
-
-    // Actions
-    addGroup: store.addKanaGroupIndex,
-    addGroups: store.addKanaGroupIndices,
-    clearSelection: () => {
-      // Toggle all currently selected groups to clear them
-      store.addKanaGroupIndices(store.kanaGroupIndices);
-    },
-    selectAll: () => {
-      // Select all 69 kana groups (based on kana.ts data)
-      const allIndices = Array.from({ length: 69 }, (_, i) => i);
-      store.addKanaGroupIndices(allIndices);
-    },
-    isGroupSelected: (index: number) => store.kanaGroupIndices.includes(index),
-    setGameMode: store.setSelectedGameModeKana
-  };
+      // Actions
+      addGroup: state.addKanaGroupIndex,
+      addGroups: state.addKanaGroupIndices,
+      clearSelection: () => {
+        // Toggle all currently selected groups to clear them
+        state.addKanaGroupIndices(state.kanaGroupIndices);
+      },
+      selectAll: () => {
+        // Select all 69 kana groups (based on kana.ts data)
+        const allIndices = Array.from({ length: 69 }, (_, i) => i);
+        state.addKanaGroupIndices(allIndices);
+      },
+      isGroupSelected: (index: number) => state.kanaGroupIndices.includes(index),
+      setGameMode: state.setSelectedGameModeKana
+    }))
+  );
 }
