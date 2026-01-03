@@ -118,12 +118,17 @@ const KanjiInputGame = ({
   // Keyboard shortcut for Enter/Space to trigger button
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        ((event.ctrlKey || event.metaKey) && event.key === 'Enter') ||
-        event.code === 'Space' ||
-        event.key === ' '
-      ) {
+      const isEnter = (event.ctrlKey || event.metaKey) && event.key === 'Enter';
+      const isSpace = event.code === 'Space' || event.key === ' ';
+
+      if (isEnter) {
         if (bottomBarState !== 'check') {
+          buttonRef.current?.click();
+        }
+      } else if (isSpace) {
+        // Only trigger button for continue state.
+        if (bottomBarState === 'correct') {
+          event.preventDefault();
           buttonRef.current?.click();
         }
       }
@@ -264,15 +269,12 @@ const KanjiInputGame = ({
       <GameIntel gameMode={gameMode} />
 
       {displayAnswerSummary ? (
-        <div className='h-[30vh] w-full'>
-          {' '}
-          {/* Dummy height to prevent jumping when switch */}
-          <AnswerSummary
-            payload={currentKanjiObj}
-            setDisplayAnswerSummary={setDisplayAnswerSummary}
-            feedback={<></>} // Handled by bottom bar
-          />
-        </div>
+        <AnswerSummary
+          payload={currentKanjiObj}
+          setDisplayAnswerSummary={setDisplayAnswerSummary}
+          feedback={<></>}
+          isEmbedded={true}
+        />
       ) : (
         <>
           <div className='flex flex-row items-center gap-1'>

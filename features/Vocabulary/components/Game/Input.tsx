@@ -117,12 +117,17 @@ const VocabInputGame = ({
   // Keyboard shortcut for Enter/Space to trigger button
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        ((event.ctrlKey || event.metaKey) && event.key === 'Enter') ||
-        event.code === 'Space' ||
-        event.key === ' '
-      ) {
+      const isEnter = (event.ctrlKey || event.metaKey) && event.key === 'Enter';
+      const isSpace = event.code === 'Space' || event.key === ' ';
+
+      if (isEnter) {
         if (bottomBarState !== 'check') {
+          buttonRef.current?.click();
+        }
+      } else if (isSpace) {
+        // Only trigger button for continue state.
+        if (bottomBarState === 'correct') {
+          event.preventDefault();
           buttonRef.current?.click();
         }
       }
@@ -270,13 +275,12 @@ const VocabInputGame = ({
       <GameIntel gameMode={gameMode} />
 
       {displayAnswerSummary ? (
-        <div className='h-[30vh] w-full'>
-          <AnswerSummary
-            payload={currentWordObj}
-            setDisplayAnswerSummary={setDisplayAnswerSummary}
-            feedback={<></>}
-          />
-        </div>
+        <AnswerSummary
+          payload={currentWordObj}
+          setDisplayAnswerSummary={setDisplayAnswerSummary}
+          feedback={<></>}
+          isEmbedded={true}
+        />
       ) : (
         <>
           <div className='flex flex-col items-center gap-4'>

@@ -16,7 +16,7 @@ const isKanjiObj = (obj: IKanjiObj | IVocabObj): obj is IKanjiObj => {
 
 // Sub-components
 const FeedbackHeader = ({ feedback }: { feedback: React.ReactElement }) => (
-  <p className="text-xl flex justify-center items-center gap-1.5 px-4 py-3 border-b-1 border-t-1 w-full border-[var(--border-color)]">
+  <p className='flex w-full items-center justify-center gap-1.5 border-t-1 border-b-1 border-[var(--border-color)] px-4 py-3 text-xl'>
     {feedback}
   </p>
 );
@@ -35,15 +35,15 @@ const ContinueButton = ({
       className={clsx(
         'w-[100vw]',
         'border-t-2 border-[var(--border-color)] bg-[var(--card-color)]',
-        'absolute bottom-0 md:bottom-6 z-10 py-4 px-4',
-        'flex justify-center items-center'
+        'absolute bottom-0 z-10 px-4 py-4 md:bottom-6',
+        'flex items-center justify-center'
       )}
     >
       <ActionButton
         ref={buttonRef}
         borderBottomThickness={8}
-        borderRadius="3xl"
-        className="text-xl  py-4 px-16 w-full md:w-1/2"
+        borderRadius='3xl'
+        className='w-full px-16 py-4 text-xl md:w-1/2'
         onClick={onClick}
         disabled={disabled}
       >
@@ -55,20 +55,20 @@ const ContinueButton = ({
 };
 
 const KanjiDisplay = ({ payload }: { payload: IKanjiObj }) => (
-  <div className="relative w-full max-w-[100px] aspect-square flex items-center justify-center">
+  <div className='relative flex aspect-square w-full max-w-[100px] items-center justify-center'>
     {/* 4-segment square background */}
-    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 border-1 border-[var(--border-color)] rounded-xl bg-[var(--background-color)]">
-      <div className="border-r border-b border-[var(--border-color)]" />
-      <div className="border-b border-[var(--border-color)]" />
-      <div className="border-r border-[var(--border-color)]" />
+    <div className='absolute inset-0 grid grid-cols-2 grid-rows-2 rounded-xl border-1 border-[var(--border-color)] bg-[var(--background-color)]'>
+      <div className='border-r border-b border-[var(--border-color)]' />
+      <div className='border-b border-[var(--border-color)]' />
+      <div className='border-r border-[var(--border-color)]' />
       <div />
     </div>
 
     <FuriganaText
       text={payload.kanjiChar}
       reading={payload.onyomi[0] || payload.kunyomi[0]}
-      className="text-7xl pb-2 relative z-10"
-      lang="ja"
+      className='relative z-10 pb-2 text-7xl'
+      lang='ja'
     />
   </div>
 );
@@ -83,13 +83,13 @@ const ReadingsList = ({
   if (isHidden) return null;
 
   return (
-    <div className="h-1/2 rounded-2xl flex flex-row gap-2 bg-[var(--card-color)]">
+    <div className='flex h-1/2 flex-row gap-2 rounded-2xl bg-[var(--card-color)]'>
       {readings.slice(0, 2).map((reading, i) => (
         <span
           key={reading}
           className={clsx(
-            'px-2 py-1 flex flex-row justify-center items-center text-sm md:text-base',
-            'text-[var(--secondary-color)] w-full',
+            'flex flex-row items-center justify-center px-2 py-1 text-sm md:text-base',
+            'w-full text-[var(--secondary-color)]',
             i < readings.slice(0, 2).length - 1 &&
               'border-r-1 border-[var(--border-color)]'
           )}
@@ -105,20 +105,22 @@ const KanjiSummary = ({
   payload,
   feedback,
   onContinue,
-  buttonRef
+  buttonRef,
+  isEmbedded = false
 }: {
   payload: IKanjiObj;
   feedback: React.ReactElement;
   onContinue: () => void;
   buttonRef: React.RefObject<HTMLButtonElement | null>;
+  isEmbedded?: boolean;
 }) => (
-  <div className="flex flex-col justify-start items-center gap-4 py-4 w-full md:w-3/4 lg:w-1/2">
-    <FeedbackHeader feedback={feedback} />
+  <div className='flex w-full flex-col items-center justify-start gap-4 py-4 md:w-3/4 lg:w-1/2'>
+    {!isEmbedded && <FeedbackHeader feedback={feedback} />}
 
-    <div className="flex flex-row w-full gap-4">
+    <div className='flex w-full flex-row gap-4'>
       <KanjiDisplay payload={payload} />
 
-      <div className="flex flex-col gap-2 w-full">
+      <div className='flex w-full flex-col gap-2'>
         <ReadingsList
           readings={payload.onyomi}
           isHidden={!payload.onyomi[0] || payload.onyomi.length === 0}
@@ -130,15 +132,17 @@ const KanjiSummary = ({
       </div>
     </div>
 
-    <p className="text-xl md:text-2xl w-full text-[var(--secondary-color)]">
+    <p className='w-full text-xl text-[var(--secondary-color)] md:text-2xl'>
       {payload.fullDisplayMeanings.join(', ')}
     </p>
 
-    <ContinueButton
-      buttonRef={buttonRef}
-      onClick={onContinue}
-      disabled={false}
-    />
+    {!isEmbedded && (
+      <ContinueButton
+        buttonRef={buttonRef}
+        onClick={onContinue}
+        disabled={false}
+      />
+    )}
   </div>
 );
 
@@ -146,12 +150,14 @@ const VocabSummary = ({
   payload,
   feedback,
   onContinue,
-  buttonRef
+  buttonRef,
+  isEmbedded = false
 }: {
   payload: IVocabObj;
   feedback: React.ReactElement;
   onContinue: () => void;
   buttonRef: React.RefObject<HTMLButtonElement | null>;
+  isEmbedded?: boolean;
 }) => {
   const showKana = usePreferencesStore(state => state.displayKana);
   const rawReading = payload.reading || '';
@@ -159,36 +165,38 @@ const VocabSummary = ({
   const displayReading = showKana ? toKana(baseReading) : toRomaji(baseReading);
 
   return (
-    <div className="flex flex-col justify-start items-center gap-4 py-4 w-full md:w-3/4 lg:w-1/2">
-      <FeedbackHeader feedback={feedback} />
+    <div className='flex w-full flex-col items-center justify-start gap-4 py-4 md:w-3/4 lg:w-1/2'>
+      {!isEmbedded && <FeedbackHeader feedback={feedback} />}
 
       <FuriganaText
         text={payload.word}
         reading={payload.reading}
-        className="text-6xl flex justify-center w-full"
-        lang="ja"
+        className='flex w-full justify-center text-6xl'
+        lang='ja'
       />
 
-      <div className="flex flex-col gap-2 items-start w-full">
+      <div className='flex w-full flex-col items-start gap-2'>
         <span
           className={clsx(
-            'rounded-xl px-2 py-1 flex flex-row items-center',
+            'flex flex-row items-center rounded-xl px-2 py-1',
             'bg-[var(--card-color)] text-lg',
             'text-[var(--secondary-color)]'
           )}
         >
           {displayReading}
         </span>
-        <p className="text-xl md:text-2xl text-[var(--secondary-color)]">
+        <p className='text-xl text-[var(--secondary-color)] md:text-2xl'>
           {payload.displayMeanings.join(', ')}
         </p>
       </div>
 
-      <ContinueButton
-        buttonRef={buttonRef}
-        onClick={onContinue}
-        disabled={false}
-      />
+      {!isEmbedded && (
+        <ContinueButton
+          buttonRef={buttonRef}
+          onClick={onContinue}
+          disabled={false}
+        />
+      )}
     </div>
   );
 };
@@ -197,11 +205,13 @@ const VocabSummary = ({
 const AnswerSummary = ({
   payload,
   setDisplayAnswerSummary,
-  feedback
+  feedback,
+  isEmbedded = false
 }: {
   payload: IKanjiObj | IVocabObj;
   setDisplayAnswerSummary: Dispatch<SetStateAction<boolean>>;
   feedback: React.ReactElement;
+  isEmbedded?: boolean;
 }) => {
   const { playClick } = useClick();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -234,6 +244,7 @@ const AnswerSummary = ({
       feedback={feedback}
       onContinue={handleContinue}
       buttonRef={buttonRef}
+      isEmbedded={isEmbedded}
     />
   ) : (
     <VocabSummary
@@ -242,6 +253,7 @@ const AnswerSummary = ({
       feedback={feedback}
       onContinue={handleContinue}
       buttonRef={buttonRef}
+      isEmbedded={isEmbedded}
     />
   );
 };
