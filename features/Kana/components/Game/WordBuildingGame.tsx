@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { kana } from '@/features/Kana/data/kana';
 import useKanaStore from '@/features/Kana/store/useKanaStore';
@@ -38,51 +38,32 @@ const isKatakana = (char: string): boolean => {
   return code >= 0x30a0 && code <= 0x30ff;
 };
 
+// Tile styles shared between active and blank tiles
+const tileBaseStyles =
+  'relative flex items-center justify-center rounded-xl px-4 py-1.5 text-2xl font-medium sm:px-4 sm:py-2 sm:text-3xl border-b-4';
+
 interface TileProps {
   id: string;
   char: string;
   onClick: () => void;
   isDisabled?: boolean;
-  isBlank?: boolean;
 }
 
-// Memoized tile component for smooth animations
-const Tile = memo(({ id, char, onClick, isDisabled, isBlank }: TileProps) => {
-  // Blank placeholder tile (invisible but takes space)
-  if (isBlank) {
-    return (
-      <motion.div
-        layoutId={`blank-${id}`}
-        className={clsx(
-          'relative flex items-center justify-center rounded-xl px-3 py-1.5 text-2xl font-medium sm:px-4 sm:py-2 sm:text-3xl',
-          'border-b-4 border-transparent bg-[var(--border-color)]/30',
-          'select-none'
-        )}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
-      >
-        <span className='opacity-0'>{char}</span>
-      </motion.div>
-    );
-  }
-
+// Active tile - uses layoutId for smooth position animations
+const ActiveTile = memo(({ id, char, onClick, isDisabled }: TileProps) => {
   return (
     <motion.button
       layoutId={id}
+      layout='position'
       type='button'
       onClick={onClick}
       disabled={isDisabled}
       className={clsx(
-        'relative flex cursor-pointer items-center justify-center rounded-xl px-3 py-1.5 text-2xl font-medium transition-colors sm:px-4 sm:py-2 sm:text-3xl',
-        'border-b-4 active:translate-y-[4px] active:border-b-0',
+        tileBaseStyles,
+        'cursor-pointer transition-colors active:translate-y-[4px] active:border-b-0',
         'border-[var(--secondary-color-accent)] bg-[var(--secondary-color)] text-[var(--background-color)]',
         isDisabled && 'cursor-not-allowed opacity-50'
       )}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
       transition={springConfig}
     >
       {char}
@@ -90,7 +71,24 @@ const Tile = memo(({ id, char, onClick, isDisabled, isBlank }: TileProps) => {
   );
 });
 
-Tile.displayName = 'Tile';
+ActiveTile.displayName = 'ActiveTile';
+
+// Blank placeholder - no layoutId, just takes up space
+const BlankTile = memo(({ char }: { char: string }) => {
+  return (
+    <div
+      className={clsx(
+        tileBaseStyles,
+        'border-transparent bg-[var(--border-color)]/30',
+        'select-none'
+      )}
+    >
+      <span className='opacity-0'>{char}</span>
+    </div>
+  );
+});
+
+BlankTile.displayName = 'BlankTile';
 
 // Bottom bar states
 type BottomBarState = 'check' | 'correct' | 'wrong';
@@ -167,8 +165,6 @@ const WordBuildingGame = ({
 
   const [feedback, setFeedback] = useState(<>{'Build the word!'}</>);
   const [bottomBarState, setBottomBarState] = useState<BottomBarState>('check');
-  // Track tiles that are animating back (to delay blank removal)
-  const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
 
   // Generate a word (array of characters) and distractors
   const generateWord = useCallback(() => {
@@ -232,7 +228,6 @@ const WordBuildingGame = ({
     setPlacedTiles([]);
     setIsChecking(false);
     setBottomBarState('check');
-    setAnimatingTiles(new Set());
     setFeedback(<>{'Build the word!'}</>);
   }, [generateWord]);
 
@@ -256,7 +251,7 @@ const WordBuildingGame = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Handle Check button - validates the answer (user can check anytime with any number of tiles)
+  // Handle Check button
   const handleCheck = useCallback(() => {
     if (placedTiles.length === 0) return;
 
@@ -342,7 +337,7 @@ const WordBuildingGame = ({
     onWrong
   ]);
 
-  // Handle Continue button - goes to next word
+  // Handle Continue button
   const handleContinue = useCallback(() => {
     playClick();
     if (bottomBarState === 'correct') {
@@ -357,20 +352,8 @@ const WordBuildingGame = ({
       if (isChecking) return;
 
       if (placedTiles.includes(char)) {
-        // Remove from placed tiles - mark as animating first
-        setAnimatingTiles(prev => new Set(prev).add(char));
         setPlacedTiles(prev => prev.filter(c => c !== char));
-
-        // Remove from animating after animation completes
-        setTimeout(() => {
-          setAnimatingTiles(prev => {
-            const next = new Set(prev);
-            next.delete(char);
-            return next;
-          });
-        }, 300);
       } else {
-        // Add to placed tiles
         setPlacedTiles(prev => [...prev, char]);
       }
     },
@@ -395,7 +378,7 @@ const WordBuildingGame = ({
     >
       <GameIntel gameMode='word-building' feedback={feedback} />
 
-      {/* Word Display - matches normal Pick game styling */}
+      {/* Word Display */}
       <div className='flex flex-row items-center gap-1'>
         <motion.p
           className='text-8xl font-medium sm:text-9xl'
@@ -407,51 +390,66 @@ const WordBuildingGame = ({
         </motion.p>
       </div>
 
-      {/* Answer Row Area - bottom border only, reduced padding */}
+      {/* Answer Row Area */}
       <div className='flex w-full flex-col items-center'>
         <div className='flex min-h-[4.5rem] w-full items-center border-b border-[var(--border-color)] px-2 sm:w-1/2'>
           <div className='flex flex-row flex-wrap justify-start gap-3'>
-            <AnimatePresence mode='sync'>
-              {placedTiles.map((char, index) => (
-                <Tile
-                  key={`placed-${index}-${char}`}
-                  id={`tile-${char}`}
-                  char={char}
-                  onClick={() => handleTileClick(char)}
-                  isDisabled={isChecking}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-
-      {/* Available Tiles - blank placeholders stay until animation completes */}
-      <div className='flex flex-row flex-wrap justify-center gap-3 sm:gap-4'>
-        <AnimatePresence mode='sync'>
-          {wordData.allTiles.map((char, index) => {
-            const isPlaced = placedTiles.includes(char);
-            const isAnimatingBack = animatingTiles.has(char);
-            // Show blank if placed OR if animating back
-            const showBlank = isPlaced || isAnimatingBack;
-
-            return (
-              <Tile
-                key={`option-${char}-${index}`}
+            {/* Render placed tiles in the answer row */}
+            {placedTiles.map(char => (
+              <ActiveTile
+                key={`tile-${char}`}
                 id={`tile-${char}`}
                 char={char}
                 onClick={() => handleTileClick(char)}
                 isDisabled={isChecking}
-                isBlank={showBlank}
               />
-            );
-          })}
-        </AnimatePresence>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Available Tiles - 2 rows on mobile, centered */}
+      {(() => {
+        // Split tiles into 2 rows for mobile (3 per row max)
+        const tilesPerRow = 3;
+        const topRowTiles = wordData.allTiles.slice(0, tilesPerRow);
+        const bottomRowTiles = wordData.allTiles.slice(tilesPerRow);
+
+        const renderTile = (char: string) => {
+          const isPlaced = placedTiles.includes(char);
+
+          if (isPlaced) {
+            return <BlankTile key={`blank-${char}`} char={char} />;
+          }
+
+          return (
+            <ActiveTile
+              key={`tile-${char}`}
+              id={`tile-${char}`}
+              char={char}
+              onClick={() => handleTileClick(char)}
+              isDisabled={isChecking}
+            />
+          );
+        };
+
+        return (
+          <div className='flex flex-col items-center gap-3 sm:gap-4'>
+            <div className='flex flex-row justify-center gap-3 sm:gap-4'>
+              {topRowTiles.map(renderTile)}
+            </div>
+            {bottomRowTiles.length > 0 && (
+              <div className='flex flex-row justify-center gap-3 sm:gap-4'>
+                {bottomRowTiles.map(renderTile)}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <Stars />
 
-      {/* Bottom Bar - positioned above the main BottomBar like AnswerSummary */}
+      {/* Bottom Bar */}
       <div
         className={clsx(
           'w-[100vw]',
@@ -501,7 +499,7 @@ const WordBuildingGame = ({
         </ActionButton>
       </div>
 
-      {/* Spacer to prevent content being hidden behind fixed bottom bar */}
+      {/* Spacer */}
       <div className='h-40' />
     </div>
   );
