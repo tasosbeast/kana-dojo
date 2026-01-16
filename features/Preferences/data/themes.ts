@@ -241,12 +241,18 @@ const baseThemeSets: BaseThemeGroup[] = [
     name: 'Dark',
     icon: Moon,
     themes: [
-              {
+      {
+        id: 'anime-pop',
+        backgroundColor: 'oklch(95.0% 0.015 85.0 / 1)',
+        mainColor: 'oklch(65.0% 0.235 345.0 / 1)',
+        secondaryColor: 'oklch(70.0% 0.200 260.0 / 1)'
+      },
+      {
         id: 'snow-lantern',
         backgroundColor: 'oklch(94.0% 0.012 250.0 / 1)',
         mainColor: 'oklch(50.0% 0.145 30.0 / 1)',
         secondaryColor: 'oklch(40.0% 0.110 250.0 / 1)'
-},
+      },
       {
         id: 'snow-lantern',
         backgroundColor: 'oklch(94.0% 0.012 250.0 / 1)',
