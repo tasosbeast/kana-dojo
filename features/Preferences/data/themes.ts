@@ -242,6 +242,12 @@ const baseThemeSets: BaseThemeGroup[] = [
     icon: Moon,
     themes: [
       {
+  id: 'akihabara-glow',
+  backgroundColor: 'oklch(15.0% 0.065 300.0 / 1)',
+  mainColor: 'oklch(80.0% 0.210 180.0 / 1)',
+  secondaryColor: 'oklch(85.0% 0.190 320.0 / 1)'
+},
+      {
         id: 'anime-pop',
         backgroundColor: 'oklch(95.0% 0.015 85.0 / 1)',
         mainColor: 'oklch(65.0% 0.235 345.0 / 1)',
